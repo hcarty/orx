@@ -13,26 +13,41 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   windows-build:
-    # The type of runner that the job will run on
     runs-on: windows-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    strategy:
+      matrix:
+        vs:
+          version:
+            - 2017
+            - 2019
+          config:
+            - Debug
+            - Profile
+            - Release
+          platform:
+            - x64
+        gmake:
+          config:
+            - debug
+            - profile
+            - release
+          platform:
+            - 64
+
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: orx setup
         run: ./setup.bat
 
-      - name: orx build (mingw-w64 debug64)
+      - name: orx build (gmake)
         working-directory: code/build/windows/gmake
-        run: make config=debug64
+        run: make config=${{ matrix.gmake.config }}${{ matrix.gmake.platform }}
 
       - uses: microsoft/setup-msbuild@v1.1
 
       - name: orx build (msbuild)
-        run: msbuild code/build/windows/vs2019/orx.sln /p:Platform=x64 /p:Configuration=Debug
+        run: msbuild code/build/windows/vs${{ matrix.vs.version }}/orx.sln /p:Platform=${{ matrix.vs.platform }} /p:Configuration=${{ matrix.vs.config }}
