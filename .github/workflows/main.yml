@@ -83,8 +83,8 @@ jobs:
       - name: Install extra OS deps
         run: sudo apt-get -y install freeglut3-dev libsndfile1-dev libopenal-dev libxrandr-dev
 
-      - name: Install 32bit support libs
-        run: sudo apt-get -y install libc6:i386 libstdc++6:i386
+      #- name: Install 32bit support libs
+      #  run: sudo apt-get -y install libc6:i386 libstdc++6:i386
 
       - name: orx setup
         run: ./setup.sh
