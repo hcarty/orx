@@ -61,3 +61,47 @@ jobs:
       - name: orx build (gmake)
         working-directory: code/build/windows/gmake
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
+
+  ubuntu-build-gmake:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        gmakeconfig:
+          - debug
+          - profile
+          - release
+        gmakeplatform:
+          - 64
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: orx setup
+        run: ./setup.sh
+
+      - name: orx build (gmake)
+        working-directory: code/build/linux/gmake
+        run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
+
+  macos-build-gmake:
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        gmakeconfig:
+          - debug
+          - profile
+          - release
+        gmakeplatform:
+          - 64
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: orx setup
+        run: ./setup.sh
+
+      - name: orx build (gmake)
+        working-directory: code/build/mac/gmake
+        run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
