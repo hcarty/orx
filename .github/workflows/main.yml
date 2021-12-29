@@ -75,6 +75,9 @@ jobs:
           - 64
 
     steps:
+      - name: Check OS version info
+        run: uname -a
+
       - uses: actions/checkout@v2
 
       - name: orx setup
