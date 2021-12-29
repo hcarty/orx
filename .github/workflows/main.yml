@@ -14,7 +14,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  windows-setup:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: orx setup
+        run: ./setup.bat
+
   windows-build-vs:
+    needs: windows-setup
     runs-on: windows-latest
 
     strategy:
@@ -30,17 +40,13 @@ jobs:
           - x64
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: orx setup
-        run: ./setup.bat
-
       - uses: microsoft/setup-msbuild@v1.1
 
-      - name: orx build (msbuild)
+      - name: orx build
         run: msbuild code/build/windows/vs${{ matrix.vsversion }}/orx.sln /p:Platform=${{ matrix.vsplatform }} /p:Configuration=${{ matrix.vsconfig }}
 
   windows-build-gmake:
+    needs: windows-setup
     runs-on: windows-latest
 
     strategy:
@@ -53,11 +59,6 @@ jobs:
           - 64
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: orx setup
-        run: ./setup.bat
-
-      - name: orx build (gmake)
+      - name: orx build
         working-directory: code/build/windows/gmake
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
