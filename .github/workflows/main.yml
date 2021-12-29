@@ -24,7 +24,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
+
       - name: MinGW setup
         uses: egor-tensin/setup-mingw@v2
         with:
@@ -36,3 +36,19 @@ jobs:
       - name: orx build
         working-directory: code/build/windows/gmake
         run: mingw32-make.exe config=debug64
+
+      # Checks out the OCaml bindings to build and test
+      - name: Checkout OCaml bindings
+        uses: actions/checkout@v2
+        with:
+          repository: hcarty/ocaml-orx
+          ref: main
+
+      - name: Use OCaml 4.13.x
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 4.13.x
+
+      - run: opam install . --deps-only --with-test
+
+      - run: opam exec -- dune build
