@@ -19,23 +19,21 @@ jobs:
 
     strategy:
       matrix:
-        vs:
-          version:
-            - 2017
-            - 2019
-          config:
-            - Debug
-            - Profile
-            - Release
-          platform:
-            - x64
-        gmake:
-          config:
-            - debug
-            - profile
-            - release
-          platform:
-            - 64
+        vsversion:
+          - 2017
+          - 2019
+        vsconfig:
+          - Debug
+          - Profile
+          - Release
+        vsplatform:
+          - x64
+        gmakeconfig:
+          - debug
+          - profile
+          - release
+        gmakeplatform:
+          - 64
 
     steps:
       - uses: actions/checkout@v2
@@ -45,9 +43,9 @@ jobs:
 
       - name: orx build (gmake)
         working-directory: code/build/windows/gmake
-        run: make config=${{ matrix.gmake.config }}${{ matrix.gmake.platform }}
+        run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
 
       - uses: microsoft/setup-msbuild@v1.1
 
       - name: orx build (msbuild)
-        run: msbuild code/build/windows/vs${{ matrix.vs.version }}/orx.sln /p:Platform=${{ matrix.vs.platform }} /p:Configuration=${{ matrix.vs.config }}
+        run: msbuild code/build/windows/vs${{ matrix.vsversion }}/orx.sln /p:Platform=${{ matrix.vsplatform }} /p:Configuration=${{ matrix.vsconfig }}
