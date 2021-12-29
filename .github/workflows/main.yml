@@ -25,14 +25,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      #- name: MinGW setup
-      #  uses: egor-tensin/setup-mingw@v2
-      #  with:
-      #    platform: x64
-
       - name: orx setup
         run: ./setup.bat
 
-      - name: orx build
+      - name: orx build (mingw-w64 debug64)
         working-directory: code/build/windows/gmake
         run: make config=debug64
+
+      - uses: microsoft/setup-msbuild@v1.1
+
+      - name: orx build (msbuild)
+        run: msbuild code/build/windows/vs2019/orx.sln /p:Platform=x64 /p:Configuration=Debug
