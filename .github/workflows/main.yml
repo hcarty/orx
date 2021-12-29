@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  windows-build:
+  windows-build-vs:
     runs-on: windows-latest
 
     strategy:
@@ -28,6 +28,23 @@ jobs:
           - Release
         vsplatform:
           - x64
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: orx setup
+        run: ./setup.bat
+
+      - uses: microsoft/setup-msbuild@v1.1
+
+      - name: orx build (msbuild)
+        run: msbuild code/build/windows/vs${{ matrix.vsversion }}/orx.sln /p:Platform=${{ matrix.vsplatform }} /p:Configuration=${{ matrix.vsconfig }}
+
+  windows-build-gmake:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
         gmakeconfig:
           - debug
           - profile
@@ -44,8 +61,3 @@ jobs:
       - name: orx build (gmake)
         working-directory: code/build/windows/gmake
         run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
-
-      - uses: microsoft/setup-msbuild@v1.1
-
-      - name: orx build (msbuild)
-        run: msbuild code/build/windows/vs${{ matrix.vsversion }}/orx.sln /p:Platform=${{ matrix.vsplatform }} /p:Configuration=${{ matrix.vsconfig }}
