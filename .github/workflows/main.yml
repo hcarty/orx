@@ -24,15 +24,15 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
-      - name: MinGW setup
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
+
+      #- name: MinGW setup
+      #  uses: egor-tensin/setup-mingw@v2
+      #  with:
+      #    platform: x64
 
       - name: orx setup
         run: ./setup.bat
 
       - name: orx build
         working-directory: code/build/windows/gmake
-        run: mingw32-make.exe config=debug64
+        run: make config=debug64
