@@ -93,7 +93,7 @@ jobs:
 
       - name: ldd check
         working-directory: code/build/rebol
-        run: ldd -R r3-linux64
+        run: ldd -r r3-linux64
 
       - name: orx setup
         run: ./setup.sh
