@@ -91,12 +91,12 @@ jobs:
       #- name: Install 32bit support libs
       #  run: sudo apt-get -y install libc6:i386 libstdc++6:i386
 
-      - name: ldd check
-        working-directory: code/build/rebol
-        run: ldd -r r3-linux
+      #- name: ldd check
+      #  working-directory: code/build/rebol
+      #  run: ldd -r r3-linux
 
       - name: orx setup
-        run: ./setup.sh
+        run: ./code/build/rebol/r3-linux64 -qs code/build/rebol/setup.r
 
       #- name: orx build (gmake)
       #  working-directory: code/build/linux/gmake
