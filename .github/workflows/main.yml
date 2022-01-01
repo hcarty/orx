@@ -96,7 +96,8 @@ jobs:
       #  run: ldd -r r3-linux
 
       - name: orx setup
-        run: ./code/build/rebol/r3-linux64 -qs code/build/rebol/setup.r
+        #run: ./code/build/rebol/r3-linux64 -qs code/build/rebol/setup.r
+        run: ./code/build/rebol/r3-linux64 --help
 
       #- name: orx build (gmake)
       #  working-directory: code/build/linux/gmake
