@@ -82,8 +82,11 @@ jobs:
       #- name: Enable 32bit library support
       #  run: sudo dpkg --add-architecture i386
 
-      #- name: Update apt repo
-      #  run: sudo apt-get -qq update
+      - name: Update apt repo
+        run: sudo apt-get -qq update
+
+      - name: Install some debug tools
+        run: sudo apt-get -y install gdb strace
 
       #- name: Install extra OS deps
       #  run: sudo apt-get -y install freeglut3-dev libsndfile1-dev libopenal-dev libxrandr-dev
