@@ -97,7 +97,7 @@ jobs:
 
       - name: orx setup
         #run: ./code/build/rebol/r3-linux64 -qs code/build/rebol/setup.r
-        run: ./code/build/rebol/r3-linux64 --help -t
+        run: gdb -q --batch -ex 'run' -ex 'bt' --args ./code/build/rebol/r3-linux64
 
       #- name: orx build (gmake)
       #  working-directory: code/build/linux/gmake
