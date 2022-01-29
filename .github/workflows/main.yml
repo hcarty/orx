@@ -15,7 +15,6 @@ on:
 
 jobs:
   windows-build-vs:
-    if: ${{ false }}
     runs-on: windows-latest
 
     strategy:
@@ -42,7 +41,6 @@ jobs:
         run: msbuild code/build/windows/vs${{ matrix.vsversion }}/orx.sln /p:Platform=${{ matrix.vsplatform }} /p:Configuration=${{ matrix.vsconfig }}
 
   windows-build-gmake:
-    if: ${{ false }}
     runs-on: windows-latest
 
     strategy:
@@ -71,43 +69,36 @@ jobs:
       matrix:
         gmakeconfig:
           - debug
-          #- profile
-          #- release
+          - profile
+          - release
         gmakeplatform:
+          - 32
           - 64
 
     steps:
       - uses: actions/checkout@v2
 
-      #- name: Enable 32bit library support
-      #  run: sudo dpkg --add-architecture i386
+      - name: Enable 32bit library support
+        run: sudo dpkg --add-architecture i386
 
       - name: Update apt repo
         run: sudo apt-get -qq update
 
-      - name: Install some debug tools
-        run: sudo apt-get -y install gdb strace
+      - name: Install extra OS deps
+        run: sudo apt-get -y install freeglut3-dev libsndfile1-dev libopenal-dev libxrandr-dev
 
-      #- name: Install extra OS deps
-      #  run: sudo apt-get -y install freeglut3-dev libsndfile1-dev libopenal-dev libxrandr-dev
+      - name: Install 32bit support libs
+        run: sudo apt-get -y install libc6:i386 libstdc++6:i386
 
-      #- name: Install 32bit support libs
-      #  run: sudo apt-get -y install libc6:i386 libstdc++6:i386
-
-      #- name: ldd check
-      #  working-directory: code/build/rebol
-      #  run: ldd -r r3-linux
 
       - name: orx setup
-        #run: ./code/build/rebol/r3-linux64 -qs code/build/rebol/setup.r
-        run: strace ./code/build/rebol/r3-linux64
+        run: ./setup.sh
 
-      #- name: orx build (gmake)
-      #  working-directory: code/build/linux/gmake
-      #  run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
+      - name: orx build (gmake)
+        working-directory: code/build/linux/gmake
+        run: make config=${{ matrix.gmakeconfig }}${{ matrix.gmakeplatform }}
 
   macos-build-gmake:
-    if: ${{ false }}
     runs-on: macos-latest
 
     strategy:
