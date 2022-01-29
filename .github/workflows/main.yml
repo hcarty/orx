@@ -84,10 +84,10 @@ jobs:
         run: sudo apt-get -qq update
 
       - name: Install multilib support
-        run: sudo apt-get -y install gcc-multilib g++-multilib libc6:i386 libstdc++6:i386
+        run: sudo apt-get -y install gcc-multilib g++-multilib
 
       - name: Install extra OS deps
-        run: sudo apt-get -y install freeglut3-dev libxrandr-dev
+        run: sudo apt-get -y install freeglut3-dev freeglut:i386 libxrandr-dev libxrandr:i386
 
       - name: orx setup
         run: ./setup.sh
