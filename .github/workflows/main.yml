@@ -72,23 +72,20 @@ jobs:
           - profile
           - release
         gmakeplatform:
-          #- 32
+          - 32
           - 64
 
     steps:
       - uses: actions/checkout@v2
 
-      #- name: Enable 32bit library support
-      #  run: sudo dpkg --add-architecture i386
-
       - name: Update apt repo
         run: sudo apt-get -qq update
 
+      - name: Install multilib support
+        run: sudo apt-get -y install gcc-multilib g++-multilib
+
       - name: Install extra OS deps
         run: sudo apt-get -y install freeglut3-dev libsndfile1-dev libopenal-dev libxrandr-dev
-
-      #- name: Install 32bit support libs
-      #  run: sudo apt-get -y install libc6:i386 libstdc++6:i386 gcc-multilib
 
       - name: orx setup
         run: ./setup.sh
