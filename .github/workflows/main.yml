@@ -51,7 +51,6 @@ jobs:
           - profile
           - release
         gmakeplatform:
-          - 32
           - 64
 
     steps:
@@ -74,7 +73,6 @@ jobs:
           - profile
           - release
         gmakeplatform:
-          - 32
           - 64
 
     steps:
@@ -83,11 +81,8 @@ jobs:
       - name: Update apt repo
         run: sudo apt-get -qq update
 
-      - name: Install multilib support
-        run: sudo apt-get -y install gcc-multilib g++-multilib
-
       - name: Install extra OS deps
-        run: sudo apt-get -y install freeglut3-dev freeglut:i386 libxrandr-dev libxrandr:i386
+        run: sudo apt-get -y install freeglut3-dev libxrandr-dev
 
       - name: orx setup
         run: ./setup.sh
