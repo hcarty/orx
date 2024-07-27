@@ -46,6 +46,11 @@
 #define orxSNDH_IMPL
 #include "orxSndh.h"
 #undef orxSNDH_IMPL]
+[+python
+
+#define orxPY_IMPL
+#include "orxPy.h"
+#undef orxPY_IMPL]
 
 void InitExtensions()
 {
@@ -73,10 +78,18 @@ void InitExtensions()
   // Initialize Dear ImGui
   orxImGui_Init();
 ]
+[+python
+  // Initialize Python support
+  orxPy_Init();
+]
 }
 
 void ExitExtensions()
 {
+[+python
+  // Exit from Python support
+  orxPy_Exit();
+]
 [+cheat
   // Exit from cheat support
   orxCheat_Exit();

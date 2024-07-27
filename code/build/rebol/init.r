@@ -15,6 +15,7 @@ params: compose/deep [
   mod         {MOD (Protracker), XM (FastTracker 2) & S3M (Scream Tracker 3) decoding support}  -         []
   movie       {Movie (MPEG-1) decoding support}                                                 -         []
   nuklear     {Nuklear support (https://github.com/immediate-mode-ui/nuklear)}                  -         []
+  python      {Python support (https://pocketpy.dev)}                                           -         [+c++]
   remote      {orxRemote support (resources can be stored on a web server, HTTP-only)}          -         []
   scroll      {C++ convenience layer with config-object binding}                                +         [+c++]
   sndh        {SNDH (Atari ST) decoding support}                                                -         [+c++]
