@@ -112,31 +112,9 @@ static orxSTATUS orxFASTCALL orxClay_BeginFrame(const orxEVENT *_pstEvent)
     pstViewport = orxVIEWPORT(orxStructure_GetLast(orxSTRUCTURE_ID_VIEWPORT));
     if(pstViewport)
     {
-      orxAABOX  stViewportBox;
-      orxFLOAT  fCorrectionRatio;
+      orxAABOX stViewportBox;
 
-      orxViewport_GetBox(pstViewport, &stViewportBox);
-      fCorrectionRatio = orxViewport_GetCorrectionRatio(pstViewport);
-      if(fCorrectionRatio != orxFLOAT_1)
-      {
-        orxFLOAT fDelta;
-        if(fCorrectionRatio < orxFLOAT_1)
-        {
-          fDelta = orx2F(0.5f) * (orxFLOAT_1 - fCorrectionRatio) * (stViewportBox.vBR.fX - stViewportBox.vTL.fX);
-
-          // Updates viewport
-          stViewportBox.vTL.fX += fDelta;
-          stViewportBox.vBR.fX -= fDelta;
-        }
-        else
-        {
-          fDelta = orx2F(0.5f) * (orxFLOAT_1 - (orxFLOAT_1 / fCorrectionRatio)) * (stViewportBox.vBR.fY - stViewportBox.vTL.fY);
-
-          // Updates viewport
-          stViewportBox.vTL.fY += fDelta;
-          stViewportBox.vBR.fY -= fDelta;
-        }
-      }
+      orxViewport_GetRatioCorrectedBox(pstViewport, &stViewportBox);
 
       Clay_SetLayoutDimensions((Clay_Dimensions){stViewportBox.vBR.fX - stViewportBox.vTL.fX, stViewportBox.vBR.fY - stViewportBox.vTL.fY});
       orxVector_Copy(&svOffset, &(stViewportBox.vTL));

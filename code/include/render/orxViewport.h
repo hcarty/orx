@@ -288,7 +288,7 @@ extern orxDLLAPI void orxFASTCALL             orxViewport_GetSize(const orxVIEWP
  */
 extern orxDLLAPI void orxFASTCALL             orxViewport_GetRelativeSize(const orxVIEWPORT *_pstViewport, orxFLOAT *_pfWidth, orxFLOAT *_pfHeight);
 
-/** Gets an axis aligned box of viewport
+/** Gets a full axis aligned box of the viewport (before ratio correction, if any)
  * @param[in]   _pstViewport    Concerned viewport
  * @param[out]  _pstBox         Output box
  * @return orxAABOX / orxNULL
@@ -300,6 +300,13 @@ extern orxDLLAPI orxAABOX *orxFASTCALL        orxViewport_GetBox(const orxVIEWPO
  * @return      Correction ratio value
  */
 extern orxDLLAPI orxFLOAT orxFASTCALL         orxViewport_GetCorrectionRatio(const orxVIEWPORT *_pstViewport);
+
+/** Gets a ratio corrected axis aligned box of the viewport
+ * @param[in]   _pstViewport    Concerned viewport
+ * @param[out]  _pstBox         Output box
+ * @return orxAABOX / orxNULL
+ */
+extern orxDLLAPI orxAABOX *orxFASTCALL        orxViewport_GetRatioCorrectedBox(const orxVIEWPORT *_pstViewport, orxAABOX *_pstBox);
 
 /** Gets viewport config name
  * @param[in]   _pstViewport    Concerned viewport

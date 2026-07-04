@@ -316,43 +316,11 @@ static orxINLINE void orxRender_Home_RenderFPS()
     if(pstViewport != orxNULL)
     {
       orxAABOX  stBox;
-      orxFLOAT  fWidth, fHeight, fCorrectionRatio;
+      orxFLOAT  fWidth, fHeight;
 
       /* Gets its box & size */
-      orxViewport_GetBox(pstViewport, &stBox);
+      orxViewport_GetRatioCorrectedBox(pstViewport, &stBox);
       orxViewport_GetRelativeSize(pstViewport, &fWidth, &fHeight);
-
-      /* Gets current correction ratio */
-      fCorrectionRatio = orxViewport_GetCorrectionRatio(pstViewport);
-
-      /* Has correction ratio? */
-      if(orxMath_Abs(fCorrectionRatio - orxFLOAT_1) >= orxMATH_KF_EPSILON)
-      {
-        /* X axis? */
-        if(fCorrectionRatio < orxFLOAT_1)
-        {
-          orxFLOAT fDelta;
-
-          /* Gets rendering limit delta using correction ratio */
-          fDelta = orx2F(0.5f) * (orxFLOAT_1 - fCorrectionRatio) * (stBox.vBR.fX - stBox.vTL.fX);
-
-          /* Updates viewport */
-          stBox.vTL.fX += fDelta;
-          stBox.vBR.fX -= fDelta;
-        }
-        /* Y axis */
-        else
-        {
-          orxFLOAT fDelta;
-
-          /* Gets rendering limit delta using correction ratio */
-          fDelta = orx2F(0.5f) * (orxFLOAT_1 - (orxFLOAT_1 / fCorrectionRatio)) * (stBox.vBR.fY - stBox.vTL.fY);
-
-          /* Updates viewport */
-          stBox.vTL.fY += fDelta;
-          stBox.vBR.fY -= fDelta;
-        }
-      }
 
       /* Inits transform's scale */
       stTextTransform.fScaleX = orx2F(2.0f) * fWidth;
@@ -1749,7 +1717,7 @@ static orxINLINE void orxRender_Home_RenderViewport(const orxVIEWPORT *_pstViewp
         orxVector_Set(&(stTextureBox.vBR), fTextureWidth, fTextureHeight, orxFLOAT_0);
 
         /* Gets viewport box */
-        orxViewport_GetBox(_pstViewport, &stViewportBox);
+        orxViewport_GetRatioCorrectedBox(_pstViewport, &stViewportBox);
 
         /* Gets its center */
         orxAABox_GetCenter(&stViewportBox, &vViewportCenter);
@@ -1760,42 +1728,9 @@ static orxINLINE void orxRender_Home_RenderViewport(const orxVIEWPORT *_pstViewp
         /* Does it intersect with texture? */
         if(orxAABox_Test2DIntersection(&stTextureBox, &stViewportBox) != orxFALSE)
         {
-          orxFLOAT    fCorrectionRatio;
           orxCOLOR    stColor;
           orxBOOL     bHasColor = orxFALSE;
           orxCAMERA  *pstCamera;
-
-          /* Gets current correction ratio */
-          fCorrectionRatio = orxViewport_GetCorrectionRatio(_pstViewport);
-
-          /* Has correction ratio? */
-          if(orxMath_Abs(fCorrectionRatio - orxFLOAT_1) >= orxMATH_KF_EPSILON)
-          {
-            /* X axis? */
-            if(fCorrectionRatio < orxFLOAT_1)
-            {
-              orxFLOAT fDelta;
-
-              /* Gets rendering limit delta using correction ratio */
-              fDelta = orx2F(0.5f) * (orxFLOAT_1 - fCorrectionRatio) * (stViewportBox.vBR.fX - stViewportBox.vTL.fX);
-
-              /* Updates viewport */
-              stViewportBox.vTL.fX += fDelta;
-              stViewportBox.vBR.fX -= fDelta;
-            }
-            /* Y axis */
-            else
-            {
-              orxFLOAT fDelta;
-
-              /* Gets rendering limit delta using correction ratio */
-              fDelta = orx2F(0.5f) * (orxFLOAT_1 - (orxFLOAT_1 / fCorrectionRatio)) * (stViewportBox.vBR.fY - stViewportBox.vTL.fY);
-
-              /* Updates viewport */
-              stViewportBox.vTL.fY += fDelta;
-              stViewportBox.vBR.fY -= fDelta;
-            }
-          }
 
           /* Does viewport have a background color? */
           if((bHasColor = orxViewport_HasBackgroundColor(_pstViewport)) != orxFALSE)
@@ -2742,40 +2677,10 @@ orxVECTOR *orxFASTCALL orxRender_Home_GetWorldPosition(const orxVECTOR *_pvScree
     && ((pstCamera = orxViewport_GetCamera(pstViewport)) != orxNULL))
     {
       orxAABOX  stViewportBox;
-      orxFLOAT  fCorrectionRatio;
       orxBOOL   bInViewportBox;
 
       /* Gets viewport box */
-      orxViewport_GetBox(pstViewport, &stViewportBox);
-
-      /* Gets viewport correction ratio */
-      fCorrectionRatio = orxViewport_GetCorrectionRatio(pstViewport);
-
-      /* Has one? */
-      if(fCorrectionRatio != orxFLOAT_1)
-      {
-        orxFLOAT fDelta;
-
-        /* Should correct horizontally? */
-        if(fCorrectionRatio < orxFLOAT_1)
-        {
-          /* Gets rendering limit delta using correction ratio */
-          fDelta = orx2F(0.5f) * (orxFLOAT_1 - fCorrectionRatio) * (stViewportBox.vBR.fX - stViewportBox.vTL.fX);
-
-          /* Updates viewport */
-          stViewportBox.vTL.fX += fDelta;
-          stViewportBox.vBR.fX -= fDelta;
-        }
-        else
-        {
-          /* Gets rendering limit delta using correction ratio */
-          fDelta = orx2F(0.5f) * (orxFLOAT_1 - (orxFLOAT_1 / fCorrectionRatio)) * (stViewportBox.vBR.fY - stViewportBox.vTL.fY);
-
-          /* Updates viewport */
-          stViewportBox.vTL.fY += fDelta;
-          stViewportBox.vBR.fY -= fDelta;
-        }
-      }
+      orxViewport_GetRatioCorrectedBox(pstViewport, &stViewportBox);
 
       /* Updates position in box status? */
       bInViewportBox = ((_pvScreenPosition->fX >= stViewportBox.vTL.fX)

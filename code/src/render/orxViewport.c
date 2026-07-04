@@ -125,7 +125,9 @@ struct __orxVIEWPORT_t
   orxFLOAT              fRealY;                                               /**< Y position (top left corner) : 120 */
   orxFLOAT              fRealWidth;                                           /**< Width : 124 */
   orxFLOAT              fRealHeight;                                          /**< Height : 128 */
-  orxTEXTURE           *apstTextureList[orxVIEWPORT_KU32_MAX_TEXTURE_NUMBER]; /**< Associated texture list : 192 */
+  orxFLOAT              fTextureWidth;                                        /**< Texture width : 132 */
+  orxFLOAT              fTextureHeight;                                       /**< Texture height : 136 */
+  orxTEXTURE           *apstTextureList[orxVIEWPORT_KU32_MAX_TEXTURE_NUMBER]; /**< Associated texture list : 200 */
 };
 
 /** Static structure
@@ -920,6 +922,10 @@ static orxSTATUS orxFASTCALL orxViewport_EventHandler(const orxEVENT *_pstEvent)
             orxViewport_SetSize(pstViewport, pstViewport->fRealWidth * fWidthRatio, pstViewport->fRealHeight * fHeightRatio);
             orxViewport_SetPosition(pstViewport, pstViewport->fRealX * fWidthRatio, pstViewport->fRealY * fHeightRatio);
 
+            /* Updates texture size */
+            pstViewport->fTextureWidth   *= fWidthRatio;
+            pstViewport->fTextureHeight  *= fHeightRatio;
+
             /* Sends event */
             orxEVENT_SEND(orxEVENT_TYPE_VIEWPORT, orxVIEWPORT_EVENT_RESIZE, (orxHANDLE)pstViewport, (orxHANDLE)pstViewport, orxNULL);
           }
@@ -931,6 +937,10 @@ static orxSTATUS orxFASTCALL orxViewport_EventHandler(const orxEVENT *_pstEvent)
             /* Updates relative position & dimension */
             orxViewport_SetSize(pstViewport, pstViewport->fRealWidth * fWidthRatio, pstViewport->fRealHeight * fHeightRatio);
             orxViewport_SetPosition(pstViewport, pstViewport->fRealX * fWidthRatio, pstViewport->fRealY * fHeightRatio);
+
+            /* Updates texture size */
+            pstViewport->fTextureWidth   *= fWidthRatio;
+            pstViewport->fTextureHeight  *= fHeightRatio;
 
             /* For all textures */
             for(i = 0; i < pstViewport->u32TextureCount; i++)
@@ -948,7 +958,7 @@ static orxSTATUS orxFASTCALL orxViewport_EventHandler(const orxEVENT *_pstEvent)
                 orxTexture_UnlinkBitmap(pstViewport->apstTextureList[i]);
 
                 /* Re-creates it as the right size */
-                pstBitmap = orxDisplay_CreateBitmap(orxF2U(pstViewport->fWidth), orxF2U(pstViewport->fHeight));
+                pstBitmap = orxDisplay_CreateBitmap(orxF2U(pstViewport->fTextureWidth), orxF2U(pstViewport->fTextureHeight));
 
                 /* Checks */
                 orxASSERT(pstBitmap != orxNULL);
@@ -1253,8 +1263,30 @@ orxVIEWPORT *orxFASTCALL orxViewport_CreateFromConfig(const orxSTRING _zConfigID
 
         /* *** Textures *** */
 
+        /* Gets texture count */
+        s32Number = orxConfig_GetListCount(orxVIEWPORT_KZ_CONFIG_TEXTURE_LIST);
+
+        /* None? */
+        if(s32Number <= 0)
+        {
+          const orxSTRING zTextureName;
+
+          /* Gets old-style texture name */
+          zTextureName = orxConfig_GetString(orxVIEWPORT_KZ_CONFIG_TEXTURE);
+
+          /* Valid? */
+          if((zTextureName != orxNULL) && (zTextureName != orxSTRING_EMPTY))
+          {
+            /* Stores it */
+            orxConfig_SetString(orxVIEWPORT_KZ_CONFIG_TEXTURE_LIST, zTextureName);
+
+            /* Updates texture count */
+            s32Number = 1;
+          }
+        }
+
         /* Has texture list? */
-        if((s32Number = orxConfig_GetListCount(orxVIEWPORT_KZ_CONFIG_TEXTURE_LIST)) > 0)
+        if(s32Number > 0)
         {
           orxS32      i, s32TextureCount;
           orxU32      u32OwnerFlags = 0;
@@ -1386,93 +1418,6 @@ orxVIEWPORT *orxFASTCALL orxViewport_CreateFromConfig(const orxSTRING _zConfigID
 
             /* Updates status flags */
             orxStructure_SetFlags(pstResult, orxVIEWPORT_KU32_FLAG_INTERNAL_TEXTURES, orxVIEWPORT_KU32_FLAG_NONE);
-          }
-        }
-        else
-        {
-          const orxSTRING zTextureName;
-
-          /* Gets old-style texture name */
-          zTextureName = orxConfig_GetString(orxVIEWPORT_KZ_CONFIG_TEXTURE);
-
-          /* Valid? */
-          if((zTextureName != orxNULL) && (zTextureName != orxSTRING_EMPTY))
-          {
-            orxTEXTURE *pstTexture;
-            orxU32      u32OwnerFlags = 0;
-            orxBOOL     bDisplayLevelEnabled;
-
-            /* Gets display debug level state */
-            bDisplayLevelEnabled = orxDEBUG_IS_LEVEL_ENABLED(orxDEBUG_LEVEL_DISPLAY);
-
-            /* Deactivates display debug level */
-            orxDEBUG_ENABLE_LEVEL(orxDEBUG_LEVEL_DISPLAY, orxFALSE);
-
-            /* Loads texture */
-            pstTexture = orxTexture_Load(zTextureName, orxConfig_GetBool(orxVIEWPORT_KZ_CONFIG_KEEP_IN_CACHE));
-
-            /* Restores display debug level state */
-            orxDEBUG_ENABLE_LEVEL(orxDEBUG_LEVEL_DISPLAY, bDisplayLevelEnabled);
-
-            /* Not found? */
-            if(pstTexture == orxNULL)
-            {
-              orxBITMAP *pstBitmap;
-
-              /* Creates new bitmap */
-              pstBitmap = orxDisplay_CreateBitmap(orxF2U(pstResult->fWidth), orxF2U(pstResult->fHeight));
-
-              /* Valid? */
-              if(pstBitmap != orxNULL)
-              {
-                /* Clears it */
-                orxDisplay_ClearBitmap(pstBitmap, orx2RGBA(0, 0, 0, 0));
-
-                /* Creates new texture */
-                pstTexture = orxTexture_Create();
-
-                /* Valid? */
-                if(pstTexture != orxNULL)
-                {
-                  /* Links them */
-                  if(orxTexture_LinkBitmap(pstTexture, pstBitmap, zTextureName, orxTRUE) != orxSTATUS_FAILURE)
-                  {
-                    /* Updates owner flags */
-                    u32OwnerFlags = 1;
-                  }
-                  else
-                  {
-                    /* Deletes texture */
-                    orxTexture_Delete(pstTexture);
-                    pstTexture = orxNULL;
-
-                    /* Deletes bitmap */
-                    orxDisplay_DeleteBitmap(pstBitmap);
-                  }
-                }
-                else
-                {
-                  /* Deletes bitmap */
-                  orxDisplay_DeleteBitmap(pstBitmap);
-                }
-              }
-            }
-
-            /* Valid? */
-            if(pstTexture != orxNULL)
-            {
-              /* Sets it */
-              orxViewport_SetTextureList(pstResult, 1, &pstTexture);
-
-              /* Stores texture owner flags */
-              pstResult->u32TextureOwnerFlags = u32OwnerFlags;
-
-              /* Updates its owner */
-              orxStructure_SetOwner(pstTexture, pstResult);
-
-              /* Updates status flags */
-              orxStructure_SetFlags(pstResult, orxVIEWPORT_KU32_FLAG_INTERNAL_TEXTURES, orxVIEWPORT_KU32_FLAG_NONE);
-            }
           }
         }
 
@@ -1867,7 +1812,7 @@ void orxFASTCALL orxViewport_SetTextureList(orxVIEWPORT *_pstViewport, orxU32 _u
   /* Has new textures? */
   if(_u32TextureNumber != 0)
   {
-    orxFLOAT fTextureWidth, fTextureHeight;
+    orxFLOAT fTextureWidth = orxFLOAT_0, fTextureHeight = orxFLOAT_0;
     orxU32 u32TextureCount;
 
     /* Checks */
@@ -1909,6 +1854,10 @@ void orxFASTCALL orxViewport_SetTextureList(orxVIEWPORT *_pstViewport, orxU32 _u
       /* Updates its reference count */
       orxStructure_IncreaseCount(_apstTextureList[i]);
     }
+
+    /* Updates texture size */
+    _pstViewport->fTextureWidth   = fTextureWidth;
+    _pstViewport->fTextureHeight  = fTextureHeight;
 
     /* Updates texture count */
     _pstViewport->u32TextureCount = u32TextureCount;
@@ -2452,7 +2401,8 @@ orxSTATUS orxFASTCALL orxViewport_SetRelativePosition(orxVIEWPORT *_pstViewport,
     orxFLOAT fHeight, fWidth;
 
     /* Gets texture size */
-    orxTexture_GetSize(pstTexture, &fWidth, &fHeight);
+    fWidth  = _pstViewport->fTextureWidth;
+    fHeight = _pstViewport->fTextureHeight;
 
     /* Align left? */
     if(_u32AlignFlags & orxVIEWPORT_KU32_FLAG_ALIGN_LEFT)
@@ -2578,9 +2528,9 @@ orxSTATUS orxFASTCALL orxViewport_SetRelativeSize(orxVIEWPORT *_pstViewport, orx
   if(pstTexture != orxNULL)
   {
     /* Updates viewport size */
-    orxTexture_GetSize(pstTexture, &(_pstViewport->fRealWidth), &(_pstViewport->fRealHeight));
-    _pstViewport->fRealWidth   *= _fW;
-    _pstViewport->fRealHeight  *= _fH;
+    orxTexture_GetSize(pstTexture, &(_pstViewport->fTextureWidth), &(_pstViewport->fTextureHeight));
+    _pstViewport->fRealWidth  = _fW * _pstViewport->fTextureWidth;
+    _pstViewport->fRealHeight = _fH * _pstViewport->fTextureHeight;
 
     /* Updates rounded values */
     _pstViewport->fWidth  = orxMath_Round(_pstViewport->fRealWidth);
@@ -2645,9 +2595,8 @@ void orxFASTCALL orxViewport_GetRelativeSize(const orxVIEWPORT *_pstViewport, or
   if(pstTexture != orxNULL)
   {
     /* Gets relative size */
-    orxTexture_GetSize(pstTexture, _pfW, _pfH);
-    *_pfW = _pstViewport->fWidth / *_pfW;
-    *_pfH = _pstViewport->fHeight / *_pfH;
+    *_pfW = _pstViewport->fWidth / _pstViewport->fTextureWidth;
+    *_pfH = _pstViewport->fHeight / _pstViewport->fTextureHeight;
   }
   else
   {
@@ -2663,7 +2612,7 @@ void orxFASTCALL orxViewport_GetRelativeSize(const orxVIEWPORT *_pstViewport, or
   return;
 }
 
-/** Gets an axis aligned box of viewport
+/** Gets a full axis aligned box of the viewport (before ratio correction, if any)
  * @param[in]   _pstViewport    Concerned viewport
  * @param[out]  _pstBox         Output box
  * @return orxAABOX / orxNULL
@@ -2682,9 +2631,7 @@ orxAABOX *orxFASTCALL orxViewport_GetBox(const orxVIEWPORT *_pstViewport, orxAAB
 
   /* Sets its values */
   orxVector_Set(&(pstResult->vTL), _pstViewport->fX, _pstViewport->fY, orxFLOAT_0);
-  orxVector_Copy(&(pstResult->vBR), &(pstResult->vTL));
-  pstResult->vBR.fX += _pstViewport->fWidth;
-  pstResult->vBR.fY += _pstViewport->fHeight;
+  orxVector_Set(&(pstResult->vBR), _pstViewport->fX + _pstViewport->fWidth, _pstViewport->fY + _pstViewport->fHeight, orxFLOAT_0);
 
   /* Done! */
   return pstResult;
@@ -2734,6 +2681,61 @@ orxFLOAT orxFASTCALL orxViewport_GetCorrectionRatio(const orxVIEWPORT *_pstViewp
 
   /* Done! */
   return fResult;
+}
+
+/** Gets a ratio corrected axis aligned box of the viewport
+ * @param[in]   _pstViewport    Concerned viewport
+ * @param[out]  _pstBox         Output box
+ * @return orxAABOX / orxNULL
+ */
+orxAABOX *orxFASTCALL orxViewport_GetRatioCorrectedBox(const orxVIEWPORT *_pstViewport, orxAABOX *_pstBox)
+{
+  orxFLOAT  fCorrectionRatio;
+  orxAABOX *pstResult;
+
+  /* Checks */
+  orxASSERT(sstViewport.u32Flags & orxVIEWPORT_KU32_STATIC_FLAG_READY);
+  orxSTRUCTURE_ASSERT(_pstViewport);
+  orxASSERT(_pstBox != orxNULL);
+
+  /* Gets viewport box */
+  orxViewport_GetBox(_pstViewport, _pstBox);
+
+  /* Gets viewport correction ratio */
+  fCorrectionRatio = orxViewport_GetCorrectionRatio(_pstViewport);
+
+  /* Has one? */
+  if(orxMath_Abs(fCorrectionRatio - orxFLOAT_1) >= orxMATH_KF_EPSILON)
+  {
+    orxFLOAT fDelta;
+
+    /* X axis? */
+    if(fCorrectionRatio < orxFLOAT_1)
+    {
+      /* Gets rendering limit delta using correction ratio */
+      fDelta = orx2F(0.5f) * (orxFLOAT_1 - fCorrectionRatio) * (_pstBox->vBR.fX - _pstBox->vTL.fX);
+
+      /* Updates viewport */
+      _pstBox->vTL.fX += fDelta;
+      _pstBox->vBR.fX -= fDelta;
+    }
+    /* Y axis */
+    else
+    {
+      /* Gets rendering limit delta using correction ratio */
+      fDelta = orx2F(0.5f) * (orxFLOAT_1 - (orxFLOAT_1 / fCorrectionRatio)) * (_pstBox->vBR.fY - _pstBox->vTL.fY);
+
+      /* Updates viewport */
+      _pstBox->vTL.fY += fDelta;
+      _pstBox->vBR.fY -= fDelta;
+    }
+  }
+
+  /* Updates result */
+  pstResult = _pstBox;
+
+  /* Done! */
+  return pstResult;
 }
 
 /** Gets viewport config name
