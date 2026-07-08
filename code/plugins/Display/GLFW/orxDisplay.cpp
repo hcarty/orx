@@ -237,6 +237,7 @@
 #define orxDISPLAY_KU32_STATIC_FLAG_CUSTOM_IBO      0x00002000  /**< Custom IBO flag */
 #define orxDISPLAY_KU32_STATIC_FLAG_DEBUG_OUTPUT    0x00004000  /**< Debug output support flag */
 #define orxDISPLAY_KU32_STATIC_FLAG_HIDDEN          0x00008000  /**< Hidden flag */
+#define orxDISPLAY_KU32_STATIC_FLAG_MRTDEFAULT      0x00010000  /**< MRT default flag */
 #define orxDISPLAY_KU32_STATIC_FLAG_VSYNC_FIX       0x10000000  /**< VSync fix flag */
 #define orxDISPLAY_KU32_STATIC_FLAG_UPDATE_REQUEST  0x20000000  /**< Video mode update request flag */
 
@@ -6207,6 +6208,18 @@ orxSTATUS orxFASTCALL orxDisplay_GLFW_SetVideoMode(const orxDISPLAY_VIDEO_MODE *
       orxFLAG_SET(sstDisplay.u32Flags, orxDISPLAY_KU32_STATIC_FLAG_NONE, orxDISPLAY_KU32_STATIC_FLAG_DEPTHBUFFER);
     }
 
+    /* Default to multiple render targets? */
+    if((orxConfig_HasValue(orxDISPLAY_KZ_CONFIG_MRTDEFAULT) != orxFALSE) && (orxConfig_GetBool(orxDISPLAY_KZ_CONFIG_MRTDEFAULT) == orxFALSE))
+    {
+      /* Updates flags */
+      orxFLAG_SET(sstDisplay.u32Flags, orxDISPLAY_KU32_STATIC_FLAG_NONE, orxDISPLAY_KU32_STATIC_FLAG_MRTDEFAULT);
+    }
+    else
+    {
+      /* Updates flags */
+      orxFLAG_SET(sstDisplay.u32Flags, orxDISPLAY_KU32_STATIC_FLAG_MRTDEFAULT, orxDISPLAY_KU32_STATIC_FLAG_NONE);
+    }
+
     /* Depending on video depth */
     switch(iDepth)
     {
@@ -6310,7 +6323,7 @@ orxSTATUS orxFASTCALL orxDisplay_GLFW_SetVideoMode(const orxDISPLAY_VIDEO_MODE *
         if(orxFLAG_TEST(sstDisplay.u32Flags, orxDISPLAY_KU32_STATIC_FLAG_SHADER))
         {
           orxU32                  u32ShaderVersion = orxU32_UNDEFINED;
-          static const orxSTRING  szFragmentShaderSource =
+          static const orxSTRING  szFragmentShaderSourceColor =
 #ifdef __orxDISPLAY_OPENGL_ES__
           "precision highp float;"
 #endif /* __orxDISPLAY_OPENGL_ES__ */
@@ -6321,7 +6334,18 @@ orxSTATUS orxFASTCALL orxDisplay_GLFW_SetVideoMode(const orxDISPLAY_VIDEO_MODE *
           "{"
           "  gl_FragColor = _Color0_.rgba * texture2D(orxTexture, _gl_TexCoord0_).rgba;"
           "}";
-          static const orxSTRING szNoTextureFragmentShaderSource =
+          static const orxSTRING  szFragmentShaderSourceData =
+#ifdef __orxDISPLAY_OPENGL_ES__
+          "precision highp float;"
+#endif /* __orxDISPLAY_OPENGL_ES__ */
+          "varying vec2 _gl_TexCoord0_;"
+          "varying vec4 _Color0_;"
+          "uniform sampler2D orxTexture;"
+          "void main()"
+          "{"
+          "  gl_FragData[0] = _Color0_.rgba * texture2D(orxTexture, _gl_TexCoord0_).rgba;"
+          "}";
+          static const orxSTRING szNoTextureFragmentShaderSourceColor =
 #ifdef __orxDISPLAY_OPENGL_ES__
           "precision highp float;"
 #endif /* __orxDISPLAY_OPENGL_ES__ */
@@ -6331,6 +6355,19 @@ orxSTATUS orxFASTCALL orxDisplay_GLFW_SetVideoMode(const orxDISPLAY_VIDEO_MODE *
           "{"
           "  gl_FragColor = _Color0_;"
           "}";
+          static const orxSTRING szNoTextureFragmentShaderSourceData =
+#ifdef __orxDISPLAY_OPENGL_ES__
+          "precision highp float;"
+#endif /* __orxDISPLAY_OPENGL_ES__ */
+          "varying vec2 _gl_TexCoord0_;"
+          "varying vec4 _Color0_;"
+          "void main()"
+          "{"
+          "  gl_FragData[0] = _Color0_;"
+          "}";
+
+          static const orxSTRING szFragmentShaderSource = orxFLAG_TEST(sstDisplay.u32Flags, orxDISPLAY_KU32_STATIC_FLAG_MRTDEFAULT) ? szFragmentShaderSourceColor : szFragmentShaderSourceData;
+          static const orxSTRING szNoTextureFragmentShaderSource = orxFLAG_TEST(sstDisplay.u32Flags, orxDISPLAY_KU32_STATIC_FLAG_MRTDEFAULT) ? szNoTextureFragmentShaderSourceColor : szNoTextureFragmentShaderSourceData;
 
           /* Has shader version value? */
           if(orxConfig_HasValue(orxDISPLAY_KZ_CONFIG_SHADER_VERSION))

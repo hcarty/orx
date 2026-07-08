@@ -237,6 +237,7 @@ typedef struct __orxCOLOR_t
 #define orxDISPLAY_KZ_CONFIG_SMOOTH                         "Smoothing"
 #define orxDISPLAY_KZ_CONFIG_VSYNC                          "VSync"
 #define orxDISPLAY_KZ_CONFIG_DEPTHBUFFER                    "DepthBuffer"
+#define orxDISPLAY_KZ_CONFIG_MRTDEFAULT                     "MRTDefault"
 #define orxDISPLAY_KZ_CONFIG_SHADER_VERSION                 "ShaderVersion"
 #define orxDISPLAY_KZ_CONFIG_SHADER_EXTENSION_LIST          "ShaderExtensionList"
 #define orxDISPLAY_KZ_CONFIG_MONITOR                        "Monitor"
